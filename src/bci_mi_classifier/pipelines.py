@@ -1,6 +1,6 @@
-"""Classical classification pipelines (planned, stub only).
+"""Classical classification pipelines.
 
-Planned responsibility:
+Responsibility:
     Build scikit-learn compatible pipelines for the version 1 benchmark. Every
     supervised transform (e.g. CSP) must live inside the pipeline so it is fit
     only on training folds during cross-validation, preventing leakage.
@@ -24,60 +24,112 @@ from __future__ import annotations
 
 from typing import Any
 
+from . import config
+
 
 def build_csp_lda(n_components: int | None = None) -> Any:
     """Build the primary CSP+LDA pipeline.
 
-    Planned behavior:
-        Compose ``mne.decoding.CSP`` (with a fixed, documented component count
-        from ``config.N_CSP_COMPONENTS``) followed by scikit-learn's
-        ``LinearDiscriminantAnalysis`` in a single ``Pipeline``.
+    Composes ``mne.decoding.CSP`` (with a fixed, documented component count from
+    ``config.N_CSP_COMPONENTS``) followed by scikit-learn's
+    ``LinearDiscriminantAnalysis`` in a single ``Pipeline``. CSP is a supervised
+    transform and lives inside the pipeline so it is fit only on training folds
+    during cross-validation.
 
     Args:
         n_components: Number of CSP components. Defaults to
             ``config.N_CSP_COMPONENTS``.
 
     Returns:
-        A scikit-learn compatible estimator/pipeline.
+        A scikit-learn ``Pipeline`` (CSP -> LDA).
     """
-    raise NotImplementedError("version 0.1 scaffold: CSP+LDA pipeline deferred")
+    from mne.decoding import CSP
+    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+    from sklearn.pipeline import Pipeline
+
+    if n_components is None:
+        n_components = config.N_CSP_COMPONENTS
+
+    csp = CSP(n_components=n_components, reg=None, log=True, norm_trace=False)
+    lda = LinearDiscriminantAnalysis()
+    return Pipeline([("CSP", csp), ("LDA", lda)])
 
 
 def build_dummy() -> Any:
     """Build the optional chance/dummy baseline pipeline.
 
-    Planned behavior:
-        Wrap scikit-learn's ``DummyClassifier`` so that mean binary ROC-AUC is
-        near the 0.5 chance level, providing a sanity-check reference.
+    Wraps scikit-learn's ``DummyClassifier`` (stratified strategy) so that mean
+    binary ROC-AUC is near the 0.5 chance level, providing a sanity-check
+    reference. The 2D ``DummyClassifier`` is fronted by a flattening step so it
+    accepts the 3D ``(trials, channels, times)`` epochs arrays MOABB provides.
 
     Returns:
-        A scikit-learn compatible estimator/pipeline.
+        A scikit-learn ``Pipeline`` (flatten -> DummyClassifier).
     """
-    raise NotImplementedError("version 0.1 scaffold: dummy baseline deferred")
+    from sklearn.dummy import DummyClassifier
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import FunctionTransformer
+
+    flatten = FunctionTransformer(
+        _flatten_epochs, validate=False, feature_names_out=None
+    )
+    dummy = DummyClassifier(strategy="stratified", random_state=config.RANDOM_STATE)
+    return Pipeline([("flatten", flatten), ("dummy", dummy)])
+
+
+def _flatten_epochs(X: Any) -> Any:
+    """Reshape ``(trials, channels, times)`` arrays to ``(trials, features)``."""
+    import numpy as np
+
+    arr = np.asarray(X)
+    if arr.ndim <= 2:
+        return arr
+    return arr.reshape(arr.shape[0], -1)
 
 
 def build_logvar_lda() -> Any:
     """Build the optional LogVariance+LDA pipeline.
 
-    Planned behavior:
-        Compose a band-power / log-variance feature transform with
-        ``LinearDiscriminantAnalysis`` as a simple comparison baseline.
+    Composes a log-variance band-power feature transform with
+    ``LinearDiscriminantAnalysis`` as a simple comparison baseline. Deferred for
+    version 0.2; provided for completeness and not registered by default.
 
     Returns:
-        A scikit-learn compatible estimator/pipeline.
+        A scikit-learn ``Pipeline`` (log-variance -> LDA).
     """
-    raise NotImplementedError("version 0.1 scaffold: LogVariance+LDA deferred")
+    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import FunctionTransformer
+
+    logvar = FunctionTransformer(
+        _log_variance, validate=False, feature_names_out=None
+    )
+    lda = LinearDiscriminantAnalysis()
+    return Pipeline([("logvar", logvar), ("LDA", lda)])
 
 
-def build_pipelines() -> dict[str, Any]:
+def _log_variance(X: Any) -> Any:
+    """Log of per-channel temporal variance for each trial."""
+    import numpy as np
+
+    arr = np.asarray(X)
+    return np.log(np.var(arr, axis=-1) + 1e-12)
+
+
+def build_pipelines(include_dummy: bool = False) -> dict[str, Any]:
     """Return the mapping of pipeline name to estimator for the benchmark.
 
-    Planned behavior:
-        Assemble the version 1 pipelines into a dict consumed by the MOABB
-        evaluation. CSP+LDA is always included; dummy and LogVariance+LDA are
-        optional.
+    CSP+LDA is always included as the primary version 0.2 baseline. The
+    chance/dummy baseline is optional (off by default for the headline run);
+    LogVariance+LDA and Riemannian pipelines are deferred.
+
+    Args:
+        include_dummy: If ``True``, also register the chance/dummy baseline.
 
     Returns:
         Mapping of pipeline name to scikit-learn compatible estimator.
     """
-    raise NotImplementedError("version 0.1 scaffold: pipeline registry deferred")
+    pipelines: dict[str, Any] = {"CSP+LDA": build_csp_lda()}
+    if include_dummy:
+        pipelines["Dummy"] = build_dummy()
+    return pipelines
