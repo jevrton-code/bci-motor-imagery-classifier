@@ -4,8 +4,8 @@ Reproducible EEG motor imagery classification using public BCI data, MOABB, and 
 
 This repository benchmarks left-hand vs right-hand motor imagery classification on the PhysionetMI dataset using a transparent evaluation protocol. The goal is to build a credible foundation for future BCI and neurotechnology work, not to claim a production-ready brain-computer interface.
 
-> **Status: version 0.4 - multi-pipeline within-session baselines with results and figures.**
-> The dataset, pipeline, evaluation, result, and visualization modules are implemented. A within-session benchmark of CSP+LDA, Dummy (chance), and LogVariance+LDA has been run on PhysionetMI subjects 1-10 under a single MOABB evaluation (`scripts/run_baseline.py`), and the aggregate summary table and multi-pipeline figures have been generated from those results (`scripts/run_analysis.py`). The curated result tables (`results/baseline_results.csv`, `results/aggregate_scores.csv`) and figures (`figures/*.png`) are committed; raw EEG recordings and MOABB/MNE caches remain git-ignored and are never committed.
+> **Status: v1.0 release — GitHub-ready classical within-session baseline benchmark.**
+> Three pipelines (CSP+LDA, Dummy, LogVariance+LDA) were evaluated on PhysionetMI subjects 1-10 under a single MOABB within-session protocol. Curated results, figures, and a methodology report are committed. Raw EEG recordings and MOABB/MNE caches remain git-ignored and are never committed.
 
 ## Why This Project
 
@@ -90,9 +90,9 @@ The benchmark is designed to report:
 
 The first release uses within-session evaluation because the selected MOABB dataset snapshot has one session. Cross-subject evaluation is deferred and will be interpreted separately if added later. See `docs/evaluation_protocol.md` for the full protocol.
 
-## Results (v0.4)
+## Results (v1.0)
 
-These results come from a single within-session MOABB run of three pipelines (CSP+LDA, Dummy, LogVariance+LDA) on PhysionetMI subjects 1-10 (`LeftRightImagery`, 8-32 Hz, fixed random seed 42, ROC-AUC primary metric). All pipelines were evaluated in one `WithinSessionEvaluation` call so they share identical splits. Reproduce via `scripts/run_baseline.py` followed by `scripts/run_analysis.py`.
+These results come from a single within-session MOABB run of three pipelines (CSP+LDA, Dummy, LogVariance+LDA) on PhysionetMI subjects 1-10 (`LeftRightImagery`, 8-32 Hz, fixed random seed 42, ROC-AUC primary metric). All pipelines were evaluated in one `WithinSessionEvaluation` call so they share identical splits. Full methodology and interpretation: [`reports/bci_motor_imagery_report.md`](reports/bci_motor_imagery_report.md). Reproduce via `scripts/run_baseline.py` followed by `scripts/run_analysis.py`.
 
 Aggregate within-session ROC-AUC across the 10 subjects:
 
@@ -130,11 +130,11 @@ bci-motor-imagery-classifier/
   docs/                 # project, dataset, evaluation, model-card, limitations docs (local only)
   scripts/              # run_baseline.py (benchmark) and run_analysis.py (summary + figures)
   notebooks/            # planned benchmark + analysis notebooks
-  reports/              # planned methodology/results report
+  reports/              # methodology/results report (bci_motor_imagery_report.md)
   results/              # curated result CSVs committed; raw data ignored
   figures/              # curated figures committed; other outputs ignored
   src/bci_mi_classifier/  # implemented modules (config, datasets, pipelines, evaluation, results, visualization)
-  tests/                # placeholder tests (pytest collection passes)
+  tests/                # config/schema tests (pytest; placeholders skipped)
 ```
 
 ## Installation / Setup
@@ -153,7 +153,7 @@ pip install -r requirements.txt
 pip install -e ".[dev]"
 ```
 
-Core dependencies (planned): `moabb`, `mne`, `scikit-learn`, `pandas`, `numpy`, `matplotlib`, `seaborn`; `pytest` for development. See `requirements.txt` and `pyproject.toml`.
+Core dependencies: `moabb`, `mne`, `scikit-learn`, `pandas`, `numpy`, `matplotlib`, `seaborn`; `pytest` for development. See `requirements.txt` and `pyproject.toml`.
 
 > Installing dependencies and running `scripts/run_baseline.py` will cause MOABB to download EEG data into a local cache on first use (this can take several minutes). That cache is git-ignored and must never be committed. The analysis step (`scripts/run_analysis.py`) only reads the saved result CSV and downloads nothing.
 
@@ -169,12 +169,10 @@ python3 scripts/run_analysis.py
 
 ### Running the tests
 
-The tests are currently placeholders that confirm collection works:
-
 ```bash
-pytest
-# or, to inspect collection only:
-python -m pytest --collect-only -q
+python3 -m pytest -q
+# verify package version after install:
+python3 -c "import bci_mi_classifier; print(bci_mi_classifier.__version__)"
 ```
 
 ## Outputs
@@ -188,10 +186,7 @@ Generated and committed (curated, reproducible artifacts):
 - `figures/score_distribution.png`
 - `scripts/run_baseline.py` - reproducible benchmark runner.
 - `scripts/run_analysis.py` - aggregate summary + figure generation.
-
-Planned for later versions:
-
-- a short methodology/results/limitations report.
+- `reports/bci_motor_imagery_report.md` - methodology, results, limitations, reproducibility.
 
 ## What This Project Shows
 
@@ -204,24 +199,27 @@ Planned for later versions:
 
 ## Limitations
 
-- Version 1 uses only subjects 1-10.
-- Within-session performance does **not** imply cross-user generalization.
-- Scores can vary strongly by subject.
-- No clinical, diagnostic, or cognitive interpretation is provided.
-- No real-time BCI control is implemented.
-- Deep learning is deferred until classical baselines are stable.
+**Read these before interpreting any scores.**
 
-See `docs/limitations.md` for details.
+- Version 1 uses only **subjects 1-10** of PhysionetMI (not the full 109-subject dataset).
+- **Within-session performance does not imply cross-user generalization** — models were not tested on unseen users or sessions.
+- **Subject variability is high** — CSP+LDA ROC-AUC ranged from 0.23 to 1.00 across subjects; aggregate means hide failure cases.
+- **No clinical, diagnostic, or cognitive claims** — this is a research baseline, not a medical or cognitive assessment tool.
+- **No real-time BCI control** — offline benchmark only; no online decoding or hardware integration.
+- **Deep learning deferred** — version 1 is classical baselines only; fixed hyperparameters, no test-set tuning.
+- **Library-dependent** — exact scores may vary slightly with MOABB/MNE/scikit-learn versions.
+
+See [`reports/bci_motor_imagery_report.md`](reports/bci_motor_imagery_report.md) (Limitations section) for the full v1.0 write-up.
 
 ## Roadmap
 
-- Version 0.1: repository structure and documentation. (done)
-- Version 0.2: first MOABB within-session CSP+LDA benchmark on subjects 1-10. (done)
-- Version 0.3: result tables, aggregate summaries, and figures. (done)
-- Version 0.4: dummy and LogVariance+LDA baselines. (done, this release)
-- Version 1.0: polished report, stable docs, GitHub-ready release.
+- Version 0.1: repository structure and documentation. (**done**)
+- Version 0.2: first MOABB within-session CSP+LDA benchmark on subjects 1-10. (**done**)
+- Version 0.3: result tables, aggregate summaries, and figures. (**done**)
+- Version 0.4: Dummy and LogVariance+LDA baselines. (**done**)
+- Version 1.0: polished report, stable docs, GitHub-ready release. (**done — current release**)
 
-Future: full 109-subject benchmark; cross-subject evaluation; Riemannian geometry pipeline; deep learning benchmark; real-time biosignal dashboard (separate project). See `ROADMAP.md`.
+**Future (deferred):** full 109-subject benchmark; cross-subject evaluation; Riemannian geometry pipeline; deep learning benchmark; real-time biosignal dashboard (separate project). See [`ROADMAP.md`](ROADMAP.md).
 
 ## License and Citation
 

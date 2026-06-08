@@ -42,14 +42,14 @@ Add the simple baselines and broaden comparison.
 - [x] **BCI-403** Add chance / dummy baseline (chance level visible in results/figures).
 - [x] **BCI-404** Add LogVariance+LDA baseline (same evaluation protocol).
 
-## Version 1.0 - Documentation and GitHub Polish
+## Version 1.0 - Documentation and GitHub Polish (done)
 
 Polished report, stable docs, and a GitHub-ready release.
 
-- [ ] **BCI-601** Write final README (purpose, dataset, paradigm, protocol, pipelines, results, limitations, roadmap).
-- [ ] **BCI-602** Write model cards (CSP+LDA and any additional pipeline).
-- [ ] **BCI-603** Write limitations page (subset, within-session, no real-time, no clinical, no deep learning in v1).
-- [ ] **BCI-604** Final QA (no raw data / cache in Git; citations; polished README; results + figures; reproducibility tested).
+- [x] **BCI-601** Write final README (purpose, dataset, paradigm, protocol, pipelines, results, limitations, roadmap).
+- [x] **BCI-602** Write model cards (CSP+LDA, Dummy, LogVariance+LDA — all three evaluated).
+- [x] **BCI-603** Write limitations page (subset, within-session, no real-time, no clinical, no deep learning in v1).
+- [x] **BCI-604** Final QA (no raw data / cache in Git; citations; polished README; results + figures; reproducibility tested).
 
 ## Future (deferred)
 

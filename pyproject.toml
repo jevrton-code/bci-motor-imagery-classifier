@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bci-motor-imagery-classifier"
-version = "0.4.0"
+version = "1.0.0"
 description = "Reproducible EEG motor imagery classification benchmark using MOABB, PhysionetMI, and classical machine-learning baselines (CSP+LDA)."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -24,7 +24,7 @@ keywords = [
     "neurotechnology",
 ]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
