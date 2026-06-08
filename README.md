@@ -4,8 +4,8 @@ Reproducible EEG motor imagery classification using public BCI data, MOABB, and 
 
 This repository benchmarks left-hand vs right-hand motor imagery classification on the PhysionetMI dataset using a transparent evaluation protocol. The goal is to build a credible foundation for future BCI and neurotechnology work, not to claim a production-ready brain-computer interface.
 
-> **Status: version 0.3 - within-session baseline with results and figures.**
-> The dataset, pipeline, evaluation, result, and visualization modules are implemented. A within-session CSP+LDA benchmark has been run on PhysionetMI subjects 1-10 (`scripts/run_baseline.py`), and the aggregate summary table and figures have been generated from those results (`scripts/run_analysis.py`). The curated result tables (`results/baseline_results.csv`, `results/aggregate_scores.csv`) and figures (`figures/*.png`) are committed; raw EEG recordings and MOABB/MNE caches remain git-ignored and are never committed.
+> **Status: version 0.4 - multi-pipeline within-session baselines with results and figures.**
+> The dataset, pipeline, evaluation, result, and visualization modules are implemented. A within-session benchmark of CSP+LDA, Dummy (chance), and LogVariance+LDA has been run on PhysionetMI subjects 1-10 under a single MOABB evaluation (`scripts/run_baseline.py`), and the aggregate summary table and multi-pipeline figures have been generated from those results (`scripts/run_analysis.py`). The curated result tables (`results/baseline_results.csv`, `results/aggregate_scores.csv`) and figures (`figures/*.png`) are committed; raw EEG recordings and MOABB/MNE caches remain git-ignored and are never committed.
 
 ## Why This Project
 
@@ -45,7 +45,7 @@ Version 1 uses a small, reproducible subject subset:
 
 - Subjects: 1-10.
 - Evaluation: within-session.
-- Primary pipeline: CSP+LDA.
+- Pipelines: CSP+LDA, Dummy (chance), LogVariance+LDA.
 - Primary metric: ROC-AUC.
 
 Version 1 is intentionally **not**:
@@ -66,13 +66,13 @@ Classical motor imagery baseline.
 - LDA performs linear classification on the extracted features.
 - A fixed, documented CSP component count is used as a baseline; it is **not** tuned on test results.
 
-### Dummy / Chance Baseline (optional)
+### Dummy / Chance Baseline
 
-Sanity check against chance-level performance (~0.5 ROC-AUC).
+Sanity check against chance-level performance. Mean binary ROC-AUC should be near 0.5 on average; per-subject scores can deviate with small trial counts.
 
-### LogVariance+LDA (optional)
+### LogVariance+LDA
 
-Simple feature baseline for comparison.
+Simple log-variance band-power features followed by LDA. Included as a transparent feature baseline for comparison with CSP+LDA.
 
 ### Future Riemannian Baseline (deferred)
 
@@ -90,17 +90,19 @@ The benchmark is designed to report:
 
 The first release uses within-session evaluation because the selected MOABB dataset snapshot has one session. Cross-subject evaluation is deferred and will be interpreted separately if added later. See `docs/evaluation_protocol.md` for the full protocol.
 
-## Results (v0.3)
+## Results (v0.4)
 
-These results come from a single within-session MOABB run of the CSP+LDA pipeline on PhysionetMI subjects 1-10 (`LeftRightImagery`, 8-32 Hz, fixed random seed 42, ROC-AUC primary metric, CSP fit inside each cross-validation fold). They are reproducible via `scripts/run_baseline.py` followed by `scripts/run_analysis.py`.
+These results come from a single within-session MOABB run of three pipelines (CSP+LDA, Dummy, LogVariance+LDA) on PhysionetMI subjects 1-10 (`LeftRightImagery`, 8-32 Hz, fixed random seed 42, ROC-AUC primary metric). All pipelines were evaluated in one `WithinSessionEvaluation` call so they share identical splits. Reproduce via `scripts/run_baseline.py` followed by `scripts/run_analysis.py`.
 
-Aggregate within-session ROC-AUC for CSP+LDA across the 10 subjects:
+Aggregate within-session ROC-AUC across the 10 subjects:
 
-| pipeline | metric  | n_subjects | mean  | median | std   | IQR   | min  | max  |
-|----------|---------|-----------:|------:|-------:|------:|------:|-----:|-----:|
-| CSP+LDA  | roc_auc | 10         | 0.653 | 0.665  | 0.234 | 0.283 | 0.23 | 1.00 |
+| pipeline        | metric  | n_subjects | mean  | median | std   | IQR   | min  | max   |
+|-----------------|---------|-----------:|------:|-------:|------:|------:|-----:|------:|
+| CSP+LDA         | roc_auc | 10         | 0.653 | 0.665  | 0.234 | 0.283 | 0.23 | 1.00  |
+| Dummy           | roc_auc | 10         | 0.530 | 0.510  | 0.076 | 0.103 | 0.46 | 0.695 |
+| LogVariance+LDA | roc_auc | 10         | 0.658 | 0.670  | 0.117 | 0.173 | 0.46 | 0.80  |
 
-**Interpretation (cautious).** On the selected subjects, CSP+LDA performed above the binary chance-level ROC-AUC of 0.5 on average (mean 0.653, median 0.665), but scores varied substantially across subjects (from 0.23 to 1.00, std 0.234), and at least one subject fell below chance. These numbers should be read as a classical *within-session* baseline on a small subject subset, **not** as evidence of real-world, real-time, or cross-user BCI reliability, and they carry no clinical, diagnostic, or cognitive interpretation. The full per-subject table is in `results/baseline_results.csv` and the aggregate summary in `results/aggregate_scores.csv`.
+**Interpretation (cautious).** The Dummy baseline averaged near the binary chance-level ROC-AUC of 0.5 (mean 0.530, median 0.510), which supports the sanity of the evaluation setup, though individual subjects can deviate from 0.5 with small trial counts. On the selected subjects, CSP+LDA and LogVariance+LDA both performed above chance on average (means 0.653 and 0.658 respectively), but scores varied substantially across subjects (CSP+LDA std 0.234, range 0.23-1.00; LogVariance+LDA std 0.117, range 0.46-0.80). At least one subject fell below chance for CSP+LDA. These numbers should be read as classical *within-session* baselines on a small subject subset, **not** as evidence of real-world, real-time, or cross-user BCI reliability, and they carry no clinical, diagnostic, or cognitive interpretation. The full per-subject table is in `results/baseline_results.csv` and the aggregate summary in `results/aggregate_scores.csv`.
 
 Per-subject scores (chance level dashed at 0.5):
 
@@ -158,7 +160,7 @@ Core dependencies (planned): `moabb`, `mne`, `scikit-learn`, `pandas`, `numpy`, 
 ### Reproducing the results
 
 ```bash
-# 1. run the within-session CSP+LDA benchmark (downloads data on first use)
+# 1. run the within-session multi-pipeline benchmark (downloads data on first use)
 python3 scripts/run_baseline.py
 
 # 2. generate the aggregate summary table and figures from the saved results
@@ -215,8 +217,8 @@ See `docs/limitations.md` for details.
 
 - Version 0.1: repository structure and documentation. (done)
 - Version 0.2: first MOABB within-session CSP+LDA benchmark on subjects 1-10. (done)
-- Version 0.3: result tables, aggregate summaries, and figures. (done, this release)
-- Version 0.4: dummy and LogVariance+LDA baselines.
+- Version 0.3: result tables, aggregate summaries, and figures. (done)
+- Version 0.4: dummy and LogVariance+LDA baselines. (done, this release)
 - Version 1.0: polished report, stable docs, GitHub-ready release.
 
 Future: full 109-subject benchmark; cross-subject evaluation; Riemannian geometry pipeline; deep learning benchmark; real-time biosignal dashboard (separate project). See `ROADMAP.md`.

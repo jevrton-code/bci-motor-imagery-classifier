@@ -84,7 +84,7 @@ def run_within_session(
         datasets=[dataset],
         random_state=random_state,
         overwrite=overwrite,
-        suffix="v0_2_baseline",
+        suffix="v0_4_baselines",
     )
 
     results = evaluation.process(pipelines)

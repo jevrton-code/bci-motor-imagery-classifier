@@ -88,11 +88,11 @@ def _flatten_epochs(X: Any) -> Any:
 
 
 def build_logvar_lda() -> Any:
-    """Build the optional LogVariance+LDA pipeline.
+    """Build the LogVariance+LDA pipeline.
 
     Composes a log-variance band-power feature transform with
-    ``LinearDiscriminantAnalysis`` as a simple comparison baseline. Deferred for
-    version 0.2; provided for completeness and not registered by default.
+    ``LinearDiscriminantAnalysis`` as a simple comparison baseline. Features are
+    computed per trial from the filtered epochs; no test-set tuning is applied.
 
     Returns:
         A scikit-learn ``Pipeline`` (log-variance -> LDA).
@@ -116,20 +116,23 @@ def _log_variance(X: Any) -> Any:
     return np.log(np.var(arr, axis=-1) + 1e-12)
 
 
-def build_pipelines(include_dummy: bool = False) -> dict[str, Any]:
+def build_pipelines() -> dict[str, Any]:
     """Return the mapping of pipeline name to estimator for the benchmark.
 
-    CSP+LDA is always included as the primary version 0.2 baseline. The
-    chance/dummy baseline is optional (off by default for the headline run);
-    LogVariance+LDA and Riemannian pipelines are deferred.
+    Version 0.4 evaluates three classical baselines under the same
+    within-session protocol:
 
-    Args:
-        include_dummy: If ``True``, also register the chance/dummy baseline.
+        - CSP+LDA          : primary motor imagery baseline.
+        - Dummy            : chance/sanity-check baseline (~0.5 ROC-AUC).
+        - LogVariance+LDA  : simple feature baseline for comparison.
+
+    Riemannian geometry pipelines remain deferred.
 
     Returns:
         Mapping of pipeline name to scikit-learn compatible estimator.
     """
-    pipelines: dict[str, Any] = {"CSP+LDA": build_csp_lda()}
-    if include_dummy:
-        pipelines["Dummy"] = build_dummy()
-    return pipelines
+    return {
+        "CSP+LDA": build_csp_lda(),
+        "Dummy": build_dummy(),
+        "LogVariance+LDA": build_logvar_lda(),
+    }

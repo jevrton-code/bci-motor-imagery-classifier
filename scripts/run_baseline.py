@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-"""Run the version 0.2 within-session CSP+LDA baseline benchmark.
+"""Run the version 0.4 within-session baseline benchmark.
 
 This script wires together datasets -> pipelines -> evaluation -> results for
-the first reproducible MOABB benchmark of the project:
+the reproducible MOABB benchmark of the project:
 
     - Dataset:    MOABB ``PhysionetMI`` (subjects 1-10 by default).
     - Paradigm:   MOABB ``LeftRightImagery`` (left_hand vs right_hand,
                   fmin=8, fmax=32 Hz).
     - Evaluation: MOABB ``WithinSessionEvaluation`` with a fixed seed.
-    - Pipeline:   CSP+LDA (fixed CSP component count from ``config``).
+    - Pipelines:  CSP+LDA, Dummy (chance), LogVariance+LDA (same evaluation).
     - Metric:     ROC-AUC (binary chance level 0.5).
 
-The raw per-subject/session/pipeline result table is written to
-``results/baseline_results.csv``.
+All pipelines are passed to a single ``WithinSessionEvaluation`` so they share
+identical splits. The raw per-subject/session/pipeline result table is written
+to ``results/baseline_results.csv``.
 
 On first run MOABB downloads the PhysionetMI EEG recordings into its local
 (repository-ignored) cache; this can take several minutes. Subsequent runs
@@ -21,7 +22,7 @@ made: this is a transparent within-session classification baseline only.
 
 Usage:
     python scripts/run_baseline.py
-    python scripts/run_baseline.py --subjects 1 2 3 --include-dummy
+    python scripts/run_baseline.py --subjects 1 2 3 --overwrite
 """
 
 from __future__ import annotations
@@ -60,11 +61,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=f"Output CSV path (default: {DEFAULT_OUTPUT}).",
     )
     parser.add_argument(
-        "--include-dummy",
-        action="store_true",
-        help="Also run the chance/dummy baseline alongside CSP+LDA.",
-    )
-    parser.add_argument(
         "--overwrite",
         action="store_true",
         help="Recompute results, ignoring MOABB's evaluation cache.",
@@ -80,9 +76,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
     subjects = args.subjects if args.subjects is not None else list(config.SUBJECTS)
-    pipeline_registry = pipelines.build_pipelines(include_dummy=args.include_dummy)
+    pipeline_registry = pipelines.build_pipelines()
 
-    logger.info("=== bci-motor-imagery-classifier v0.2 baseline ===")
+    logger.info("=== bci-motor-imagery-classifier v0.4 baselines ===")
     logger.info("Dataset:    %s", config.DATASET_NAME)
     logger.info("Paradigm:   %s (fmin=%s, fmax=%s)", config.PARADIGM, config.FMIN, config.FMAX)
     logger.info("Classes:    %s", " vs ".join(config.CLASSES))

@@ -35,12 +35,12 @@ Result tables, aggregate summaries, and figures from real results.
 - [x] **BCI-502** Create per-subject score figure (with chance level shown).
 - [x] **BCI-503** Create pipeline comparison figure (same metric; cautious interpretation).
 
-## Version 0.4 - Additional Baselines
+## Version 0.4 - Additional Baselines (done)
 
 Add the simple baselines and broaden comparison.
 
-- [ ] **BCI-403** Add chance / dummy baseline (chance level visible in results/figures).
-- [ ] **BCI-404** Add LogVariance+LDA baseline (same evaluation protocol).
+- [x] **BCI-403** Add chance / dummy baseline (chance level visible in results/figures).
+- [x] **BCI-404** Add LogVariance+LDA baseline (same evaluation protocol).
 
 ## Version 1.0 - Documentation and GitHub Polish
 
