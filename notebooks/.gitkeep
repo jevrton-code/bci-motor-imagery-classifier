@@ -1,0 +1,3 @@
+# Planned notebooks (version 0.1 placeholder; no benchmark run yet):
+#   01_moabb_motor_imagery_baseline.ipynb - first within-session CSP+LDA run.
+#   02_results_analysis.ipynb             - results tables and figures.

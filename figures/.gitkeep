@@ -1,0 +1,6 @@
+# Planned figures (version 0.1 placeholder; not yet generated).
+# Generated PNGs are NOT committed (see .gitignore); this placeholder keeps the
+# directory tracked. Planned outputs:
+#   per_subject_scores.png
+#   pipeline_comparison.png
+#   score_distribution.png

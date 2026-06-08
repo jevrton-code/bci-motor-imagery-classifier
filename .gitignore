@@ -1,0 +1,61 @@
+# --- Python ---------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.python-version
+
+# --- Raw EEG data and MOABB / MNE caches (NEVER commit) -------------------
+# Raw EEG recordings and benchmark caches must not be committed. MOABB / MNE
+# download data into local caches on first use; keep all of it local.
+data/
+moabb_data/
+mne_data/
+MNE-*/
+.mne/
+*.edf
+*.fif
+*.fif.gz
+*.gdf
+*.bdf
+*.set
+*.vhdr
+*.vmrk
+*.eeg
+# Large NumPy caches (generated feature/array caches). Small intentional
+# committed arrays should be force-added if ever needed.
+*.npy
+*.npz
+
+# --- Generated benchmark outputs ------------------------------------------
+# Keep the directories (via .gitkeep) but ignore generated data outputs.
+results/*.csv
+figures/*.png
+figures/*.svg
+figures/*.pdf
+# Local results cache directory.
+.cache/
+results_cache/
+!results/.gitkeep
+!figures/.gitkeep
+
+# --- Working / planning docs (kept local per project decision) ------------
+# The docs/ folder holds local planning documents and working notes that are
+# intentionally not published to the public repository.
+docs/
+
+# --- OS / editor ----------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

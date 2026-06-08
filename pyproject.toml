@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bci-motor-imagery-classifier"
+version = "0.1.0"
+description = "Reproducible EEG motor imagery classification benchmark using MOABB, PhysionetMI, and classical machine-learning baselines (CSP+LDA)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "bci-motor-imagery-classifier contributors" },
+]
+keywords = [
+    "bci",
+    "brain-computer-interface",
+    "motor-imagery",
+    "eeg",
+    "moabb",
+    "mne-python",
+    "machine-learning",
+    "classification",
+    "neurotechnology",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "moabb>=1.0",
+    "mne>=1.6",
+    "scikit-learn>=1.3",
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "matplotlib>=3.7",
+    "seaborn>=0.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/bci-motor-imagery-classifier"
+Repository = "https://github.com/your-org/bci-motor-imagery-classifier"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

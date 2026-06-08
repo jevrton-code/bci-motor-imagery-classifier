@@ -1,0 +1,5 @@
+# Planned result tables (version 0.1 placeholder; not yet generated).
+# Generated CSVs are NOT committed (see .gitignore); this placeholder keeps the
+# directory tracked. Planned outputs:
+#   baseline_results.csv  - per subject/session/pipeline scores.
+#   aggregate_scores.csv  - per-pipeline summary statistics.
