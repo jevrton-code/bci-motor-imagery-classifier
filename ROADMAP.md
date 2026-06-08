@@ -2,7 +2,7 @@
 
 This roadmap maps the backlog (`docs/04_BACKLOG.md`, milestones M0-M6 / `BCI-xxx`) and the versioning plan (`docs/01_TECHNICAL_SPEC.md`) to releases. The guiding principle is to establish a credible, transparent evaluation before running any model, and to defer deep learning and cross-user claims.
 
-## Version 0.1 - Foundation / Scaffold (this release)
+## Version 0.1 - Foundation / Scaffold
 
 Repository structure, documentation, and documented module stubs. **No benchmark run; no data downloaded.**
 
@@ -20,20 +20,20 @@ Repository structure, documentation, and documented module stubs. **No benchmark
 - [x] Module stubs (`config`, `datasets`, `pipelines`, `evaluation`, `results`, `visualization`).
 - [x] Placeholder tests so `pytest` collection passes.
 
-## Version 0.2 - First Benchmark
+## Version 0.2 - First Benchmark (done)
 
 First reproducible MOABB within-session run on PhysionetMI subjects 1-10 with CSP+LDA.
 
-- [ ] **BCI-401** Implement first MOABB within-session benchmark (PhysionetMI, subjects 1-10, ROC-AUC, saves results CSV).
-- [ ] **BCI-402** Implement CSP+LDA baseline (scikit-learn compatible; documented CSP settings; no test-set tuning).
+- [x] **BCI-401** Implement first MOABB within-session benchmark (PhysionetMI, subjects 1-10, ROC-AUC, saves results CSV).
+- [x] **BCI-402** Implement CSP+LDA baseline (scikit-learn compatible; documented CSP settings; no test-set tuning).
 
-## Version 0.3 - Results and Visualization
+## Version 0.3 - Results and Visualization (done)
 
 Result tables, aggregate summaries, and figures from real results.
 
-- [ ] **BCI-501** Create aggregate summaries (mean, median, std, IQR, min, max, n_subjects, by pipeline).
-- [ ] **BCI-502** Create per-subject score figure (with chance level shown).
-- [ ] **BCI-503** Create pipeline comparison figure (same metric; cautious interpretation).
+- [x] **BCI-501** Create aggregate summaries (mean, median, std, IQR, min, max, n_subjects, by pipeline).
+- [x] **BCI-502** Create per-subject score figure (with chance level shown).
+- [x] **BCI-503** Create pipeline comparison figure (same metric; cautious interpretation).
 
 ## Version 0.4 - Additional Baselines
 

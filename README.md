@@ -4,8 +4,8 @@ Reproducible EEG motor imagery classification using public BCI data, MOABB, and 
 
 This repository benchmarks left-hand vs right-hand motor imagery classification on the PhysionetMI dataset using a transparent evaluation protocol. The goal is to build a credible foundation for future BCI and neurotechnology work, not to claim a production-ready brain-computer interface.
 
-> **Status: version 0.1 - foundation / scaffold.**
-> This release contains the repository structure, documentation, and documented module stubs only. **No benchmark has been run yet, and no data has been downloaded.** The files under `results/` and `figures/` are *planned* outputs and have not been generated. The modules in `src/bci_mi_classifier/` are documented stubs (planned signatures with `NotImplementedError`), not working implementations.
+> **Status: version 0.3 - within-session baseline with results and figures.**
+> The dataset, pipeline, evaluation, result, and visualization modules are implemented. A within-session CSP+LDA benchmark has been run on PhysionetMI subjects 1-10 (`scripts/run_baseline.py`), and the aggregate summary table and figures have been generated from those results (`scripts/run_analysis.py`). The curated result tables (`results/baseline_results.csv`, `results/aggregate_scores.csv`) and figures (`figures/*.png`) are committed; raw EEG recordings and MOABB/MNE caches remain git-ignored and are never committed.
 
 ## Why This Project
 
@@ -56,7 +56,7 @@ Version 1 is intentionally **not**:
 - a cross-user generalization claim;
 - a production neurotechnology system.
 
-## Planned Pipelines
+## Pipelines
 
 ### CSP+LDA (primary)
 
@@ -90,6 +90,30 @@ The benchmark is designed to report:
 
 The first release uses within-session evaluation because the selected MOABB dataset snapshot has one session. Cross-subject evaluation is deferred and will be interpreted separately if added later. See `docs/evaluation_protocol.md` for the full protocol.
 
+## Results (v0.3)
+
+These results come from a single within-session MOABB run of the CSP+LDA pipeline on PhysionetMI subjects 1-10 (`LeftRightImagery`, 8-32 Hz, fixed random seed 42, ROC-AUC primary metric, CSP fit inside each cross-validation fold). They are reproducible via `scripts/run_baseline.py` followed by `scripts/run_analysis.py`.
+
+Aggregate within-session ROC-AUC for CSP+LDA across the 10 subjects:
+
+| pipeline | metric  | n_subjects | mean  | median | std   | IQR   | min  | max  |
+|----------|---------|-----------:|------:|-------:|------:|------:|-----:|-----:|
+| CSP+LDA  | roc_auc | 10         | 0.653 | 0.665  | 0.234 | 0.283 | 0.23 | 1.00 |
+
+**Interpretation (cautious).** On the selected subjects, CSP+LDA performed above the binary chance-level ROC-AUC of 0.5 on average (mean 0.653, median 0.665), but scores varied substantially across subjects (from 0.23 to 1.00, std 0.234), and at least one subject fell below chance. These numbers should be read as a classical *within-session* baseline on a small subject subset, **not** as evidence of real-world, real-time, or cross-user BCI reliability, and they carry no clinical, diagnostic, or cognitive interpretation. The full per-subject table is in `results/baseline_results.csv` and the aggregate summary in `results/aggregate_scores.csv`.
+
+Per-subject scores (chance level dashed at 0.5):
+
+![Per-subject within-session ROC-AUC by pipeline](figures/per_subject_scores.png)
+
+Aggregate comparison across pipelines (mean +/- std, chance at 0.5):
+
+![Aggregate within-session comparison across pipelines](figures/pipeline_comparison.png)
+
+Score distribution across subjects (box plot with per-subject points, chance at 0.5):
+
+![Within-session score distribution by pipeline](figures/score_distribution.png)
+
 ## Repository Structure
 
 ```text
@@ -101,12 +125,13 @@ bci-motor-imagery-classifier/
   pyproject.toml
   requirements.txt
   .gitignore
-  docs/                 # project, dataset, evaluation, model-card, limitations docs
+  docs/                 # project, dataset, evaluation, model-card, limitations docs (local only)
+  scripts/              # run_baseline.py (benchmark) and run_analysis.py (summary + figures)
   notebooks/            # planned benchmark + analysis notebooks
   reports/              # planned methodology/results report
-  results/              # planned result CSVs (generated outputs not committed)
-  figures/              # planned figures (generated outputs not committed)
-  src/bci_mi_classifier/  # documented module stubs (config, datasets, pipelines, ...)
+  results/              # curated result CSVs committed; raw data ignored
+  figures/              # curated figures committed; other outputs ignored
+  src/bci_mi_classifier/  # implemented modules (config, datasets, pipelines, evaluation, results, visualization)
   tests/                # placeholder tests (pytest collection passes)
 ```
 
@@ -128,11 +153,21 @@ pip install -e ".[dev]"
 
 Core dependencies (planned): `moabb`, `mne`, `scikit-learn`, `pandas`, `numpy`, `matplotlib`, `seaborn`; `pytest` for development. See `requirements.txt` and `pyproject.toml`.
 
-> Installing dependencies and running the benchmark will cause MOABB to download EEG data into a local cache on first use. That cache is git-ignored and must never be committed. Version 0.1 does not download any data.
+> Installing dependencies and running `scripts/run_baseline.py` will cause MOABB to download EEG data into a local cache on first use (this can take several minutes). That cache is git-ignored and must never be committed. The analysis step (`scripts/run_analysis.py`) only reads the saved result CSV and downloads nothing.
+
+### Reproducing the results
+
+```bash
+# 1. run the within-session CSP+LDA benchmark (downloads data on first use)
+python3 scripts/run_baseline.py
+
+# 2. generate the aggregate summary table and figures from the saved results
+python3 scripts/run_analysis.py
+```
 
 ### Running the tests
 
-At version 0.1 the tests are placeholders that confirm collection works:
+The tests are currently placeholders that confirm collection works:
 
 ```bash
 pytest
@@ -140,15 +175,21 @@ pytest
 python -m pytest --collect-only -q
 ```
 
-## Expected Outputs (planned, not yet generated)
+## Outputs
 
-- `results/baseline_results.csv`
-- `results/aggregate_scores.csv`
+Generated and committed (curated, reproducible artifacts):
+
+- `results/baseline_results.csv` - per-subject within-session results.
+- `results/aggregate_scores.csv` - per-pipeline aggregate summary.
 - `figures/per_subject_scores.png`
 - `figures/pipeline_comparison.png`
 - `figures/score_distribution.png`
-- a reproducible notebook or script
-- a short methodology/results/limitations report
+- `scripts/run_baseline.py` - reproducible benchmark runner.
+- `scripts/run_analysis.py` - aggregate summary + figure generation.
+
+Planned for later versions:
+
+- a short methodology/results/limitations report.
 
 ## What This Project Shows
 
@@ -172,9 +213,9 @@ See `docs/limitations.md` for details.
 
 ## Roadmap
 
-- Version 0.1: repository structure and documentation (this release).
-- Version 0.2: first MOABB within-session CSP+LDA benchmark on subjects 1-10.
-- Version 0.3: result tables and aggregate summaries, figures.
+- Version 0.1: repository structure and documentation. (done)
+- Version 0.2: first MOABB within-session CSP+LDA benchmark on subjects 1-10. (done)
+- Version 0.3: result tables, aggregate summaries, and figures. (done, this release)
 - Version 0.4: dummy and LogVariance+LDA baselines.
 - Version 1.0: polished report, stable docs, GitHub-ready release.
 

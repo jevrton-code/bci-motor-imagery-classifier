@@ -1,0 +1,2 @@
+pipeline,metric,n_subjects,mean_score,median_score,std_score,iqr_score,min_score,max_score
+CSP+LDA,roc_auc,10,0.6529999999999999,0.665,0.23423871963827367,0.2825000000000001,0.23,1.0

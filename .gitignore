@@ -37,7 +37,7 @@ MNE-*/
 *.npz
 
 # --- Generated benchmark outputs ------------------------------------------
-# Keep the directories (via .gitkeep) but ignore generated data outputs.
+# Ignore generated data outputs by default...
 results/*.csv
 figures/*.png
 figures/*.svg
@@ -47,6 +47,14 @@ figures/*.pdf
 results_cache/
 !results/.gitkeep
 !figures/.gitkeep
+# ...but DO commit the small, curated, reproducible result tables and figures
+# so the public portfolio repo can display results. Raw EEG data and MOABB/MNE
+# caches stay ignored via the rules above and below.
+!results/baseline_results.csv
+!results/aggregate_scores.csv
+!figures/per_subject_scores.png
+!figures/pipeline_comparison.png
+!figures/score_distribution.png
 
 # --- Working / planning docs (kept local per project decision) ------------
 # The docs/ folder holds local planning documents and working notes that are
